@@ -16,6 +16,20 @@ reminder_sound = None
 reminders_running = False
 ui_queue = queue.Queue()
 
+# Function to select a sound file
+def select_sound_file():
+    file_path = filedialog.askopenfilename(
+        title="Select Sound File",
+        filetypes=[("WAV Files", "*.wav"), ("All Files", "*.*")]
+    )
+    if file_path:
+        load_sound(file_path)
+
+# Function to update the volume
+def update_volume(value):
+    if reminder_sound:
+        reminder_sound.set_volume(int(value) / 100)
+
 # Function to load the sound
 def load_sound(file_path):
     global reminder_sound
@@ -29,13 +43,6 @@ def load_sound(file_path):
     except Exception as e:
         reminder_sound = None
         messagebox.showerror("Error", f"Could not load sound: {str(e)}")
-
-# Function to show the reminder notification
-def show_reminder():
-    if reminder_sound:
-        reminder_sound.play()
-    else:
-        messagebox.showwarning("Reminder", "It's time to drink water!")
 
 # Function to preview the currently loaded sound
 def preview_sound():
@@ -73,6 +80,12 @@ def process_ui_queue():
             root.deiconify()  # Restore the window if minimized
     root.after(100, process_ui_queue)  # Check the queue every 100ms
 
+# Function to show the reminder notification
+def show_reminder():
+    if reminder_sound:
+        reminder_sound.play()
+    else:
+        messagebox.showwarning("Reminder", "It's time to drink water!")
 
 # Function to run the reminder loop
 def reminder_loop(interval):
@@ -85,8 +98,6 @@ def reminder_loop(interval):
             time.sleep(1)  # Wait for 1 second
         ui_queue.put(("show_reminder", None))  # Show reminder
 
-
-# Function to start the reminders
 # Function to start the reminders
 def start_reminders():
     global reminders_running
@@ -169,20 +180,6 @@ def create_tray_icon():
     icon = Icon("water_reminder", image, menu=menu)
     icon.run()
 
-# Function to select a sound file
-def select_sound_file():
-    file_path = filedialog.askopenfilename(
-        title="Select Sound File",
-        filetypes=[("WAV Files", "*.wav"), ("All Files", "*.*")]
-    )
-    if file_path:
-        load_sound(file_path)
-
-# Function to update the volume
-def update_volume(value):
-    if reminder_sound:
-        reminder_sound.set_volume(int(value) / 100)
-
 # Function to dynamically update the width of the entry box
 def update_entry_width(*args):
     current_text = str(interval_minutes.get())
@@ -245,7 +242,7 @@ interval_entry = ctk.CTkEntry(
 )
 interval_entry.pack()
 
-# Bind the function to update the width of the entry as text is entered
+# This function is used to update the width of the entry as text is entered
 interval_minutes.trace("w", update_entry_width)
 
 start_button = ctk.CTkButton(root, text="Start Reminders", font=custom_font, command=start_reminders)
