@@ -34,5 +34,7 @@ Click Preview Sound to hear the selected sound. If you're listening to a preview
 
 Additional Details:
 Tray Icon: The app uses the pystray library to create an icon in the system tray. It can be restored or quit by right-clicking the tray icon.
+
 Threading: The reminder loop runs on a separate thread, ensuring that the main window remains responsive.
+
 This application is ideal for people who need to be reminded to drink water regularly or take breaks at work. You can customize the reminder interval and sound according to your preferences.
