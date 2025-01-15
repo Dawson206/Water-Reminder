@@ -7,6 +7,13 @@ import os
 import queue
 from pystray import Icon, MenuItem, Menu
 from PIL import Image, ImageDraw
+import configparser
+
+# Initialize ConfigParser
+config = configparser.ConfigParser()
+
+# File path for configuration
+config_file_path = "config.ini"
 
 # Initialize pygame mixer for sound
 pygame.mixer.init()
@@ -15,6 +22,34 @@ pygame.mixer.init()
 reminder_sound = None
 reminders_running = False
 ui_queue = queue.Queue()
+config = configparser.ConfigParser()
+
+# Function to load settings from the configuration file
+def load_settings():
+    global reminder_sound
+    if os.path.exists(config_file_path):
+        config.read(config_file_path)
+        if "Settings" in config:
+            sound_path = config["Settings"].get("sound_file", "")
+            volume_level = config["Settings"].getint("volume", 75)
+            if sound_path and os.path.exists(sound_path):
+                load_sound(sound_path)
+                volume.set(volume_level)
+                reminder_sound.set_volume(volume_level / 100)
+            else:
+                print("Stored sound file not found.")
+    else:
+        print("No configuration file found.")
+
+# Function to save settings to the configuration file
+def save_settings(sound_file_path=None):
+    if "Settings" not in config:
+        config["Settings"] = {}
+    if sound_file_path:
+        config["Settings"]["sound_file"] = sound_file_path
+    config["Settings"]["volume"] = str(volume.get())
+    with open(config_file_path, "w") as config_file:
+        config.write(config_file)
 
 # Function to select a sound file
 def select_sound_file():
@@ -37,12 +72,14 @@ def load_sound(file_path):
         if os.path.exists(file_path):
             reminder_sound = pygame.mixer.Sound(file_path)
             reminder_sound.set_volume(volume.get() / 100)  # Set initial volume
+            save_settings(file_path)  # Save file path to config
             messagebox.showinfo("Sound Selected", f"Sound file loaded: {os.path.basename(file_path)}")
         else:
             raise FileNotFoundError("File not found.")
     except Exception as e:
         reminder_sound = None
         messagebox.showerror("Error", f"Could not load sound: {str(e)}")
+
 
 # Function to preview the currently loaded sound
 def preview_sound():
@@ -257,8 +294,14 @@ countdown_label.pack(pady=10)
 minimize_button = ctk.CTkButton(root, text="Minimize to Tray", font=custom_font, command=minimize_to_tray)
 minimize_button.pack(pady=10)
 
+# Load settings on startup
+load_settings()
+
 # Start the queue processing loop
 process_ui_queue()
+
+# Start the CustomTkinter event loop
+root.mainloop()
 
 # Start the CustomTkinter event loop
 root.mainloop()
