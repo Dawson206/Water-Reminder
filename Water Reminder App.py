@@ -200,8 +200,14 @@ def restore_window(icon, item):
 def quit_app(icon, item):
     global reminders_running
     reminders_running = False
+        # Stop any pygame sounds
+    if reminder_sound:
+        reminder_sound.stop()
+    pygame.mixer.quit()
     root.quit()
     icon.stop()
+        # Forcefully exit the program to ensure all threads stop
+    os._exit(0)
 
 # Function to create the tray icon
 def create_tray_icon():
