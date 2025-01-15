@@ -302,6 +302,3 @@ process_ui_queue()
 
 # Start the CustomTkinter event loop
 root.mainloop()
-
-# Start the CustomTkinter event loop
-root.mainloop()
