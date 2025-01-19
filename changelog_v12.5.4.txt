@@ -1,0 +1,25 @@
+Dawson's Water Reminder - V12.5.4
+
+
+Adds - GUI popup upon relaunch if path/file to the previously selected audio is broken.
+Adds - Reminder time saves/loads into and from config.ini.
+Adds - Volume information saves/loads into and from config.ini.
+Adds - Icon for System Tray & Window GUI updated to relative path for (.exe) package.
+Adds - Save/update settings to config.ini when exiting the application. 
+Adds - Windows audio device change handler to allow for functionality if system audio device changes.
+Adds - Build number and creator information off screen. (resize window vertically to view.)
+
+Change UI - "Set volume" changed to -> "Volume"
+Change UI - "Set Reminder Interval" changed to -> "Reminder Time"
+
+Removed - GUI popup showing the sound/audio file information loaded from previous session upon launch.
+
+Update - Updated .ICO image. (Art by Affasse.)
+
+Fix - Volume slider use availability when reminders have been started.
+Fix - Various defects/bugs discovered during testing.
+
+
+Please report any issues to https://github.com/Dawson206/Water-Reminder/issues
+
+Build v12.5.4 - 01/18/2025
