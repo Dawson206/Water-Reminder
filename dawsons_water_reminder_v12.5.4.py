@@ -1,16 +1,24 @@
 import customtkinter as ctk
-from tkinter import messagebox, filedialog
+from tkinter import Label, messagebox, filedialog
 import pygame
 import time
 import threading
 import os
 import queue
 from pystray import Icon, MenuItem, Menu
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageTk
 import configparser
+import io
+import base64
+import ctypes
+from ctypes import wintypes, POINTER
+from comtypes import CLSCTX_ALL
+from comtypes.client import CreateObject
 
 config = configparser.ConfigParser()
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+config_file_path = os.path.join(base_dir, "config.ini")
 config_file_path = "config.ini"
 
 pygame.mixer.init()
@@ -18,6 +26,41 @@ pygame.mixer.init()
 reminder_sound = None
 reminders_running = False
 ui_queue = queue.Queue()
+
+# Windows Core Audio API
+MMDeviceEnumerator = "{BCDE0395-E52F-467C-8E3D-C4579291692E}"
+IMMNotificationClient = "{7991EEC9-7E89-4D85-8390-6C703CEC60C0}"
+
+class AudioDeviceChangeHandler(ctypes.Structure):
+    _fields_ = [
+        ("lpVtbl", ctypes.POINTER(ctypes.c_void_p))
+    ]
+
+def on_device_change():
+    global reminder_sound
+    try:
+        pygame.mixer.quit()
+        pygame.mixer.init()
+        if reminder_sound:
+            reminder_sound.set_volume(volume.get() / 100)
+    except Exception as e:
+        print(f"Error reinitializing audio: {e}")
+
+def monitor_audio_device_changes():
+    device_enumerator = CreateObject(
+        MMDeviceEnumerator,
+        interface=POINTER(ctypes.c_void_p),
+        clsctx=CLSCTX_ALL
+    )
+    client = AudioDeviceChangeHandler()
+    device_enumerator.RegisterEndpointNotificationCallback(ctypes.byref(client))
+
+def start_audio_monitor():
+    def monitor_thread():
+        monitor_audio_device_changes()
+    threading.Thread(target=monitor_thread, daemon=True).start()
+
+start_audio_monitor()
 
 
 def load_settings():
@@ -27,10 +70,20 @@ def load_settings():
         if "Settings" in config:
             sound_path = config["Settings"].get("sound_file", "")
             volume_level = config["Settings"].getint("volume", 75)
-            if sound_path and os.path.exists(sound_path):
-                load_sound(sound_path)
-                volume.set(volume_level)
-                reminder_sound.set_volume(volume_level / 100)
+            reminder_interval = config["Settings"].getint("interval_minutes", 30)
+            volume.set(volume_level)
+            interval_minutes.set(reminder_interval)
+            if sound_path:
+                if os.path.exists(sound_path):
+                    load_sound(sound_path)
+                    reminder_sound.set_volume(volume_level / 100)
+                    volume.set(volume_level)
+                else:
+                    messagebox.showwarning("Broken Sound File", "The previously selected sound file is missing. Please select a new one.")
+                    select_sound_file()
+            else:
+                messagebox.showwarning("No Sound File", "No sound file selected. Please select a sound file.")
+                select_sound_file()
 
 
 def save_settings(sound_file_path=None):
@@ -39,6 +92,7 @@ def save_settings(sound_file_path=None):
     if sound_file_path:
         config["Settings"]["sound_file"] = sound_file_path
     config["Settings"]["volume"] = str(volume.get())
+    config["Settings"]["interval_minutes"] = str(interval_minutes.get())
     with open(config_file_path, "w") as config_file:
         config.write(config_file)
 
@@ -64,7 +118,9 @@ def load_sound(file_path):
             reminder_sound = pygame.mixer.Sound(file_path)
             reminder_sound.set_volume(volume.get() / 100)
             save_settings(file_path)
-            messagebox.showinfo("Sound Selected", f"Sound file loaded: {os.path.basename(file_path)}")
+        else:
+            messagebox.showwarning("Broken Sound File", "The selected sound file is missing. Please select a new one.")
+            select_sound_file()
     except Exception as e:
         reminder_sound = None
         messagebox.showerror("Error", f"Could not load sound: {str(e)}")
@@ -74,6 +130,8 @@ def preview_sound():
     if reminder_sound:
         reminder_sound.play()
         stop_preview_button.configure(state="normal")
+    else: 
+        messagebox.showerror("Error", "No sound file loaded to preview. Please select a sound file.")
 
 
 def stop_preview_sound():
@@ -131,6 +189,7 @@ def start_reminders():
         if response:
             select_sound_file()
             return
+    save_settings()
     reminders_running = True
     interval_seconds = interval_minutes.get() * 60
     reminder_thread = threading.Thread(target=reminder_loop, args=(interval_seconds,), daemon=True)
@@ -138,7 +197,7 @@ def start_reminders():
     start_button.configure(state="disabled")
     interval_entry.configure(state="disabled")
     sound_button.configure(state="disabled")
-    volume_slider.configure(state="disabled")
+    volume_slider.configure(state="normal")
     preview_button.configure(state="disabled")
     stop_preview_button.configure(state="disabled")
     stop_button.configure(state="normal")
@@ -174,6 +233,7 @@ def restore_window(icon, item):
 def quit_app(icon, item):
     global reminders_running
     reminders_running = False
+    save_settings()
     if reminder_sound:
         reminder_sound.stop()
     pygame.mixer.quit()
@@ -183,12 +243,17 @@ def quit_app(icon, item):
 
 
 def create_tray_icon():
-    image = Image.new("RGB", (64, 64), (255, 255, 255))
-    draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, 64, 64), fill=(0, 128, 255))
-    menu = Menu(MenuItem("Restore", restore_window), MenuItem("Quit", quit_app))
-    icon = Icon("water_reminder", image, menu=menu)
-    icon.run()
+    try:
+        icon_image_path = os.path.join(base_dir, "water_timer_2.ico")
+        icon_image = Image.open(icon_image_path).resize((64, 64))
+        menu = Menu(
+            MenuItem("Restore", restore_window),
+            MenuItem("Quit", quit_app)
+        )
+        icon = Icon(icon_image_path, icon_image, menu=menu)
+        icon.run()
+    except Exception as e:
+        print(f"Error loading tray icon: {e}")
 
 
 def update_entry_width(*args):
@@ -198,18 +263,28 @@ def update_entry_width(*args):
     new_width = min_width + additional_width
     interval_entry.configure(width=new_width)
 
+
+def save_on_exit():
+    save_settings()
+    root.destroy()
+
+
 root = ctk.CTk()
-root.title("Dawson's Water Reminder")
+build_number = "v12.5.4"
+root.title(f"Dawson's Water Reminder")
 root.geometry("400x550")
 root.resizable(True, True)
 root.configure(bg="#A8E6A1")
+root.protocol("WM_DELETE_WINDOW", save_on_exit)
+icon_path = os.path.join(base_dir, "water_timer_2.ico")
+root.iconbitmap(icon_path)
 custom_font = ctk.CTkFont(family="Arial", size=12)
 interval_minutes = ctk.IntVar(value=30)
 volume_label = ctk.CTkLabel(root, text="Select & Preview Sound", font=custom_font)
 volume_label.pack(pady=5)
 sound_button = ctk.CTkButton(root, text="Select Sound", font=custom_font, command=select_sound_file)
 sound_button.pack(pady=10)
-volume_label = ctk.CTkLabel(root, text="Set Volume:", font=custom_font)
+volume_label = ctk.CTkLabel(root, text="Volume:", font=custom_font)
 volume_label.pack(pady=5)
 volume = ctk.IntVar(value=75)
 volume_slider = ctk.CTkSlider(root, from_=0, to=100, variable=volume, command=update_volume, width=200)
@@ -218,7 +293,7 @@ preview_button = ctk.CTkButton(root, text="Preview Sound", font=custom_font, com
 preview_button.pack(pady=10)
 stop_preview_button = ctk.CTkButton(root, text="Stop Preview Sound", font=custom_font, command=stop_preview_sound, state="disabled")
 stop_preview_button.pack(pady=10)
-label = ctk.CTkLabel(root, text="Set Reminder Interval (minutes):", font=custom_font)
+label = ctk.CTkLabel(root, text="Reminder Time (Minutes):", font=custom_font)
 label.pack(pady=10)
 interval_entry = ctk.CTkEntry(root, textvariable=interval_minutes, font=custom_font, width=35, justify="center")
 interval_entry.pack()
@@ -231,6 +306,15 @@ countdown_label = ctk.CTkLabel(root, text="Next reminder in: --:--", font=custom
 countdown_label.pack(pady=10)
 minimize_button = ctk.CTkButton(root, text="Minimize to Tray", font=custom_font, command=minimize_to_tray)
 minimize_button.pack(pady=10)
+build_number_color = "#ffffff"
+build_number_label = ctk.CTkLabel(root, text=f"Build {build_number}", font=custom_font, text_color=build_number_color)
+build_number_label.pack(pady=5)
+build_number_label.place(x=200, y=560, anchor="center")
+label_name = ctk.CTkLabel(root, text="Connor Dawson Carlson", font=custom_font)
+label_name_color = "#ffffff"
+label_name.pack(pady=5)
+label_name.place(x=200, y=580, anchor="center")
+
 load_settings()
 process_ui_queue()
 root.mainloop()
