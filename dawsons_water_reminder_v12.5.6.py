@@ -63,9 +63,23 @@ def start_audio_monitor():
 start_audio_monitor()
 
 
+def hide_file(file_path):
+    try:
+        ctypes.windll.kernel32.SetFileAttributesW(file_path, 2)  # 2 is the attribute for hidden
+    except Exception as e:
+        print(f"Error hiding file {file_path}: {e}")
+
+def unhide_file(file_path):
+    try:
+        ctypes.windll.kernel32.SetFileAttributesW(file_path, 0)  # 0 removes the hidden attribute
+    except Exception as e:
+        print(f"Error unhiding file {file_path}: {e}")
+
+
 def load_settings():
     global reminder_sound
     if os.path.exists(config_file_path):
+        unhide_file(config_file_path)
         config.read(config_file_path)
         if "Settings" in config:
             sound_path = config["Settings"].get("sound_file", "")
@@ -87,6 +101,7 @@ def load_settings():
 
 
 def save_settings(sound_file_path=None):
+    unhide_file(config_file_path)
     if "Settings" not in config:
         config["Settings"] = {}
     if sound_file_path:
@@ -95,6 +110,7 @@ def save_settings(sound_file_path=None):
     config["Settings"]["interval_minutes"] = str(interval_minutes.get())
     with open(config_file_path, "w") as config_file:
         config.write(config_file)
+    hide_file(config_file_path)
 
 
 def select_sound_file():
@@ -209,6 +225,7 @@ def stop_reminders():
     if reminder_sound:
         reminder_sound.stop()
     pygame.mixer.stop()
+    save_settings()
     countdown_label.configure(text="Next reminder in: --:--")
     start_button.configure(state="normal")
     interval_entry.configure(state="normal")
@@ -270,7 +287,7 @@ def save_on_exit():
 
 
 root = ctk.CTk()
-build_number = "v12.5.5"
+build_number = "v12.5.6"
 root.title(f"Dawson's Water Reminder")
 root.geometry("400x550")
 root.resizable(True, True)
