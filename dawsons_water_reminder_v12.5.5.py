@@ -244,7 +244,7 @@ def quit_app(icon, item):
 
 def create_tray_icon():
     try:
-        icon_image_path = os.path.join(base_dir, "water_timer_2.ico")
+        icon_image_path = os.path.join(base_dir, "water_timer_3.ico")
         icon_image = Image.open(icon_image_path).resize((64, 64))
         menu = Menu(
             MenuItem("Restore", restore_window),
@@ -270,13 +270,13 @@ def save_on_exit():
 
 
 root = ctk.CTk()
-build_number = "v12.5.4"
+build_number = "v12.5.5"
 root.title(f"Dawson's Water Reminder")
 root.geometry("400x550")
 root.resizable(True, True)
 root.configure(bg="#A8E6A1")
 root.protocol("WM_DELETE_WINDOW", save_on_exit)
-icon_path = os.path.join(base_dir, "water_timer_2.ico")
+icon_path = os.path.join(base_dir, "water_timer_3.ico")
 root.iconbitmap(icon_path)
 custom_font = ctk.CTkFont(family="Arial", size=12)
 interval_minutes = ctk.IntVar(value=30)
