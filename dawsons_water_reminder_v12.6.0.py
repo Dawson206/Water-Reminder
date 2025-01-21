@@ -14,18 +14,23 @@ import ctypes
 from ctypes import wintypes, POINTER
 from comtypes import CLSCTX_ALL
 from comtypes.client import CreateObject
+import winreg
+import sys
+
 
 config = configparser.ConfigParser()
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 config_file_path = os.path.join(base_dir, "config.ini")
-config_file_path = "config.ini"
+
+os.chdir(base_dir)
 
 pygame.mixer.init()
 
 reminder_sound = None
 reminders_running = False
 ui_queue = queue.Queue()
+
 
 # Windows Core Audio API
 MMDeviceEnumerator = "{BCDE0395-E52F-467C-8E3D-C4579291692E}"
@@ -63,54 +68,124 @@ def start_audio_monitor():
 start_audio_monitor()
 
 
-def hide_file(file_path):
+def enable_autostart():
     try:
-        ctypes.windll.kernel32.SetFileAttributesW(file_path, 2)  # 2 is the attribute for hidden
+        app_name = "DawsonWaterReminder"
+        executable_path = os.path.abspath(__file__)  # Path to your script
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
+        winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, executable_path)
+        winreg.CloseKey(key)
+        messagebox.showinfo("Autostart Enabled", "The application will now start with Windows.")
     except Exception as e:
-        print(f"Error hiding file {file_path}: {e}")
+        messagebox.showerror("Error", f"Could not enable autostart: {e}")
 
-def unhide_file(file_path):
+
+def disable_autostart():
     try:
-        ctypes.windll.kernel32.SetFileAttributesW(file_path, 0)  # 0 removes the hidden attribute
+        app_name = "DawsonWaterReminder"
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
+        winreg.DeleteValue(key, app_name)
+        winreg.CloseKey(key)
+        messagebox.showinfo("Autostart Disabled", "The application will no longer start with Windows.")
+    except FileNotFoundError:
+        messagebox.showinfo("Autostart Not Found", "Autostart is already disabled.")
     except Exception as e:
-        print(f"Error unhiding file {file_path}: {e}")
+        messagebox.showerror("Error", f"Could not disable autostart: {e}")
+
+
+def toggle_autostart():
+    """
+    Enable or disable autostart based on the state of autostart_enabled.
+    """
+    app_name = "DawsonsWaterReminder"
+
+    if getattr(sys, 'frozen', False):  # Check if running as a PyInstaller package
+        exe_path = sys.executable
+    else:  # Running as a script
+        exe_path = os.path.abspath(__file__)
+
+    registry_key = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_key, 0, winreg.KEY_SET_VALUE) as key:
+            if autostart_enabled.get() == 1:
+                winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, exe_path)
+                save_settings()
+            else:  # Disable autostart
+                winreg.DeleteValue(key, app_name)
+                save_settings()
+    except FileNotFoundError:
+        if autostart_enabled.get() == 0:
+            messagebox.showinfo("Autostart Already Disabled", "Autostart was not enabled.")
+    except Exception as e:
+        messagebox.showerror("Autostart Error", f"Failed to update autostart settings: {str(e)}")
+
+
+def get_config_file_path():
+    if getattr(sys, 'frozen', False):  # If running as a PyInstaller bundle
+        base_dir = sys._MEIPASS
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Use AppData folder for the config file in case of packaged app
+    appdata_dir = os.getenv('APPDATA', os.path.expanduser("~"))
+    config_file_path = os.path.join(appdata_dir, "DawsonsWaterReminder", "config.ini")
+
+    os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
+
+    return config_file_path
+
+config_file_path = get_config_file_path()
 
 
 def load_settings():
     global reminder_sound
-    if os.path.exists(config_file_path):
-        unhide_file(config_file_path)
-        config.read(config_file_path)
-        if "Settings" in config:
-            sound_path = config["Settings"].get("sound_file", "")
-            volume_level = config["Settings"].getint("volume", 75)
-            reminder_interval = config["Settings"].getint("interval_minutes", 30)
-            volume.set(volume_level)
-            interval_minutes.set(reminder_interval)
-            if sound_path:
-                if os.path.exists(sound_path):
-                    load_sound(sound_path)
-                    reminder_sound.set_volume(volume_level / 100)
-                    volume.set(volume_level)
+    try:
+        if os.path.exists(config_file_path):
+            config.read(config_file_path)
+            if "Settings" in config:
+                sound_path = config["Settings"].get("sound_file", "")
+                volume_level = config["Settings"].getint("volume", 75)
+                reminder_interval = config["Settings"].getint("interval_minutes", 30)
+                volume.set(volume_level)
+                interval_minutes.set(reminder_interval)
+
+                autostart_state = config["Settings"].getint("autostart", 0)
+                autostart_enabled.set(autostart_state)
+
+                if sound_path:
+                    if os.path.exists(sound_path):
+                        load_sound(sound_path)
+                        reminder_sound.set_volume(volume_level / 100)
+                        volume.set(volume_level)
+                    else:
+                        messagebox.showwarning("Broken Sound File", "The previously selected sound file is missing. Please select a new one.")
+                        select_sound_file()
                 else:
-                    messagebox.showwarning("Broken Sound File", "The previously selected sound file is missing. Please select a new one.")
+                    messagebox.showwarning("No Sound File", "No sound file selected. Please select a sound file.")
                     select_sound_file()
-            else:
-                messagebox.showwarning("No Sound File", "No sound file selected. Please select a sound file.")
-                select_sound_file()
+        else:
+            save_settings()
+
+    except Exception as e:
+        messagebox.showerror("Error", f"Could not load settings: {str(e)}")
 
 
 def save_settings(sound_file_path=None):
-    unhide_file(config_file_path)
     if "Settings" not in config:
         config["Settings"] = {}
+
     if sound_file_path:
         config["Settings"]["sound_file"] = sound_file_path
+
     config["Settings"]["volume"] = str(volume.get())
     config["Settings"]["interval_minutes"] = str(interval_minutes.get())
-    with open(config_file_path, "w") as config_file:
-        config.write(config_file)
-    hide_file(config_file_path)
+    config["Settings"]["autostart"] = str(autostart_enabled.get())
+
+    try:
+        with open(config_file_path, "w") as config_file:
+            config.write(config_file)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to save settings: {e}")
 
 
 def select_sound_file():
@@ -264,6 +339,8 @@ def create_tray_icon():
         icon_image_path = os.path.join(base_dir, "water_timer_3.ico")
         icon_image = Image.open(icon_image_path).resize((64, 64))
         menu = Menu(
+            MenuItem("Start", start_reminders),
+            MenuItem("Stop", stop_reminders),
             MenuItem("Restore", restore_window),
             MenuItem("Quit", quit_app)
         )
@@ -287,9 +364,14 @@ def save_on_exit():
 
 
 root = ctk.CTk()
-build_number = "v12.5.6"
+
+autostart_enabled = ctk.IntVar(value=0)
+if not os.path.exists(config_file_path):
+    autostart_enabled.set(0)
+
+build_number = "v12.6.0 - Jan 20th, 2025"
 root.title(f"Dawson's Water Reminder")
-root.geometry("400x550")
+root.geometry("400x560")
 root.resizable(True, True)
 root.configure(bg="#A8E6A1")
 root.protocol("WM_DELETE_WINDOW", save_on_exit)
@@ -326,11 +408,22 @@ minimize_button.pack(pady=10)
 build_number_color = "#ffffff"
 build_number_label = ctk.CTkLabel(root, text=f"Build {build_number}", font=custom_font, text_color=build_number_color)
 build_number_label.pack(pady=5)
-build_number_label.place(x=200, y=560, anchor="center")
+build_number_label.place(x=200, y=580, anchor="center")
 label_name = ctk.CTkLabel(root, text="Connor Dawson Carlson", font=custom_font)
 label_name_color = "#ffffff"
 label_name.pack(pady=5)
-label_name.place(x=200, y=580, anchor="center")
+label_name.place(x=200, y=600, anchor="center")
+
+autostart_checkbox = ctk.CTkCheckBox(
+    root,
+    text="Start with Windows",
+    variable=autostart_enabled,
+    command=toggle_autostart,
+    font=custom_font,
+    height=20,
+    width=20,
+)
+autostart_checkbox.pack(pady=10)
 
 load_settings()
 process_ui_queue()
