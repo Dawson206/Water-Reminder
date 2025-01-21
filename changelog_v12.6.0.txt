@@ -1,0 +1,32 @@
+### **Release Notes for v12.6.0**
+
+#### **Changes from v12.5.6**
+
+**New Features:**
+1. **Improved Audio Device Monitoring:**
+   - Integrated the Windows Core Audio API to monitor audio device changes.
+   - Now, the app automatically reinitializes the audio system whenever an audio device change is detected, ensuring smooth audio playback even after switching devices.
+
+**Bug Fixes & Enhancements:**
+2. **Sound Preview Enhancements:**
+   - Added error handling to ensure the "Preview Sound" feature works only if a valid sound file is loaded. 
+   - If no sound is selected, the user is informed and prompted to select a sound file.
+   
+3. **UI Updates:**
+   - Improved the "Stop Preview Sound" button functionality to be enabled only when a preview sound is playing.
+   - Enhanced the volume control with more responsive behavior, ensuring that the volume is correctly set whenever the sound is played.
+
+**Bug Fixes:**
+4. **File Handling Improvements:**
+   - Fixed an issue where the configuration file would not properly hide or unhide on saving and loading.
+   - Enhanced error handling for file path access when interacting with the configuration file.
+
+5. **General Stability Improvements:**
+   - Various minor stability fixes for smoother operation, especially when switching between different sound files.
+
+**Other Improvements:**
+6. **Enhanced Code Structure:**
+   - Refactored certain parts of the code to improve readability and maintainability.
+
+
+This update ensures that the app handles device changes more efficiently, prevents errors with sound previews, and has improved stability across different systems.
