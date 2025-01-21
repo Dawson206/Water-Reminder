@@ -1,40 +1,78 @@
-Water Reminder App
+![water_timer_3](https://github.com/user-attachments/assets/2c1bcc3b-415e-4989-b79b-136fe4fa27ee)
 
-The Water Reminder App is a simple desktop application built with Python using Tkinter, pygame, and pystray to help users remember to drink water at regular intervals. The app allows users to:
+**Release Name**: Dawson's Water Reminder v12.6.0  
+**Release Date**: January 20th, 2025
+**Supported**: Windows 10/11
 
-Set a reminder interval (in minutes) for the reminders.
-Select a sound file to play as the reminder.
-Preview and adjust the volume of the sound.
-Minimize the app to the system tray for easy access while not in use.
-Receive reminder notifications with a sound alert at the set intervals.
-Features:
+### Important Notice:  
+Due to a false positive detection by Windows Defender Security, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
 
-Sound Reminder: Plays a sound at the specified interval to remind users to drink water.
-System Tray Icon: Allows users to minimize the app to the system tray, freeing up screen space.
-Custom Sound and Volume: Users can select a custom sound file (WAV format) and adjust the volume.
-Countdown Timer: Displays the time until the next reminder.
-Start/Stop Functionality: Users can start and stop reminders easily through the interface.
+# Dawson's Water Reminder
 
-Instructions:
-1. Set Sound and Volume:
-Click the Select Sound button to choose a WAV file (such as a sound for the reminder).
-Click Preview Sound to play the selected sound and verify it.
-Use the Volume Slider to adjust the sound's volume (0% to 100%).
-2. Set Reminder Interval:
-In the Set Reminder Interval (minutes) field, enter the number of minutes between each reminder. The default is 30 minutes.
-3. Start Reminders:
-Click Start Reminders to start receiving reminders at the set interval. A countdown will appear, showing the time remaining until the next reminder.
-The interface will update to show the countdown and disable the start options.
-4. Stop Reminders:
-Click Stop Reminders to halt the reminders at any time. The countdown will reset, and the interface will return to its original state.
-5. Minimize to Tray:
-Click Minimize to Tray to hide the app window and move it to the system tray. Right-click the tray icon to restore or quit the app.
-6. Preview and Stop Sound:
-Click Preview Sound to hear the selected sound. If you're listening to a preview and want to stop it, click Stop Preview Sound.
+**Dawson's Water Reminder** is a simple yet effective desktop application designed to remind users to stay hydrated throughout the day. Built with Python, the app uses `customtkinter` for the user interface, `pygame` for sound management, and offers a system tray integration for minimized operation. It includes features like automatic startup on Windows boot, customizable reminder intervals, and sound selection.
 
-Additional Details:
-Tray Icon: The app uses the pystray library to create an icon in the system tray. It can be restored or quit by right-clicking the tray icon.
+## Key Features:
+- **Customizable Reminder Intervals**: Set the frequency of reminders in minutes.
+- **Sound Notifications**: Choose a custom sound to play at each reminder.
+- **System Tray Integration**: Minimize the app to the system tray for convenient background operation.
+- **Autostart with Windows**: Option to enable or disable the app to start automatically when Windows boots.
+- **Audio Device Change Handling**: Automatically adjusts when the audio device is changed.
+- **Configurable Settings**: Save and load user settings such as volume, reminder interval, and sound file.
+- **Cross-platform**: Works on Windows, with future potential for cross-platform compatibility.
 
-Threading: The reminder loop runs on a separate thread, ensuring that the main window remains responsive.
+## Libraries Used:
+- `customtkinter`: A custom version of Tkinter for modern UI elements.
+- `pygame`: For sound playback functionality.
+- `pystray`: To create a system tray icon with options for app control.
+- `ctypes`, `comtypes`: For handling Windows-specific APIs such as detecting audio device changes.
+- `winreg`: For managing the Windows registry for autostart functionality.
+- `configparser`: For storing and loading user settings from a configuration file.
 
-This application is ideal for people who need to be reminded to drink water regularly or take breaks at work. You can customize the reminder interval and sound according to your preferences.
+## How It Works:
+- The app runs as a background process, reminding you to drink water at regular intervals.
+- It includes an interactive interface for selecting sound files, adjusting the volume, and setting the reminder interval.
+- It can be minimized to the system tray and continues to run quietly in the background.
+- On detecting an audio device change (such as switching from speakers to headphones), the app automatically reinitializes the sound system to ensure proper playback.
+- The app is fully configurable and saves settings such as the reminder interval, sound file, volume, and autostart preference.
+
+Here’s the updated version with optional instructions for downloading a provided `.wav` file:  
+
+---
+
+# Installation Instructions  
+
+### Important Notice:  
+Again, due to a false positive detection by Windows Defender Security, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
+
+#### To install **Dawson's Water Reminder v12.6.0**, follow these steps:  
+
+1. **Download the Installer:**  
+   - Click the **DawsonsWaterReminderv12.6.0_Setup.exe** to download the installer.  
+
+2. **Download a Sound File (Optional):**  
+   - If you do not have a preferred `.wav` sound file for the reminder, download one of the provided `.wav` audio files from below.
+   - Save the file to an easily accessible location, such as your Documents, Downloads, Music, or Desktop folder.  
+
+3. **Run the Installer:**  
+   - Locate the downloaded installer file and double-click it to start the installation process.  
+   - Follow the on-screen prompts to complete the installation.  
+
+4. **Launch the Application:**  
+   - After installation, find Dawson's Water Reminder in your Start menu or on your Desktop (if the option was selected during installation).  
+   - Double-click the icon to open the application.  
+
+5. **Set Up Your Reminder:**  
+   - During the initial setup, select your `.wav` file by clicking the "Select Sound" button in the application. You can choose the downloaded default sound file or your own `.wav` file below 100MB.  
+   - Configure your reminder intervals and volume preferences to get started.  
+
+### System Requirements:  
+- **OS:** Windows 10/11  
+- **Python:** Not required; the application comes with all necessary dependencies pre-packaged.  
+- **Disk Space:** Approximately 25 MB  
+
+### Troubleshooting:  
+- If you encounter any issues with the installation, ensure that your antivirus or firewall settings are not blocking the installer.  
+
+This project is a great way to stay hydrated while working on your computer, and it's designed to be lightweight and unobtrusive. If you have suggestions or want to contribute, feel free to open an issue or create a pull request! If you discover any issues please report to [Water-Reminder/Issues](https://github.com/Dawson206/Water-Reminder/issues)
+
+### v12.5.6 to v12.6.0 [Changelog](https://github.com/Dawson206/Water-Reminder/blob/main/changelog_v12.6.0.txt)
