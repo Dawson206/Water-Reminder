@@ -1,11 +1,11 @@
 ![water_timer_3](https://github.com/user-attachments/assets/2c1bcc3b-415e-4989-b79b-136fe4fa27ee)
 
-**Release Name**: Dawson's Water Reminder v12.6.0  
+**Release Name**: Dawson's Water Reminder v12.7.0  
 **Release Date**: January 20th, 2025
 **Supported**: Windows 10/11
 
 ### Important Notice:  
-Due to a false positive detection by Windows Defender Security, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
+Due to a false positive detection by Windows Defender Security, most likely from this not having a CA digital signature, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
 
 # Dawson's Water Reminder
 
@@ -44,10 +44,10 @@ Here’s the updated version with optional instructions for downloading a provid
 ### Important Notice:  
 Again, due to a false positive detection by Windows Defender Security, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
 
-#### To install **Dawson's Water Reminder v12.6.0**, follow these steps:  
+#### To install **Dawson's Water Reminder v12.7.0**, follow these steps:  
 
 1. **Download the Installer:**  
-   - Click the **DawsonsWaterReminderv12.6.0_Setup.exe** to download the installer.  
+   - Click the **DawsonsWaterReminderv12.7.0_Setup.exe** to download the installer.  
 
 2. **Download a Sound File (Optional):**  
    - If you do not have a preferred `.wav` sound file for the reminder, download one of the provided `.wav` audio files from below.
@@ -75,4 +75,4 @@ Again, due to a false positive detection by Windows Defender Security, it is cur
 
 This project is a great way to stay hydrated while working on your computer, and it's designed to be lightweight and unobtrusive. If you have suggestions or want to contribute, feel free to open an issue or create a pull request! If you discover any issues please report to [Water-Reminder/Issues](https://github.com/Dawson206/Water-Reminder/issues)
 
-### v12.5.6 to v12.6.0 [Changelog](https://github.com/Dawson206/Water-Reminder/blob/main/changelog_v12.6.0.txt)
+### v12.6.0 to v12.7.0 [Changelog](https://github.com/Dawson206/Water-Reminder/blob/main/changelog_v12.7.0.txt)
