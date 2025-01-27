@@ -368,7 +368,7 @@ if not os.path.exists(config_file_path):
 
 root.title(f"Dawson's Water Reminder")
 build_number = "v12.7.0 - Jan 26th, 2025"
-root.geometry("400x775")
+root.geometry("400x780")
 root.resizable(True, True)
 root.configure(bg="#A8E6A1")
 root.protocol("WM_DELETE_WINDOW", save_on_exit)
