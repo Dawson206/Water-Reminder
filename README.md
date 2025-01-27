@@ -1,7 +1,7 @@
 ![water_timer_3](https://github.com/user-attachments/assets/2c1bcc3b-415e-4989-b79b-136fe4fa27ee)
 
 **Release Name**: Dawson's Water Reminder v12.7.0  
-**Release Date**: January 20th, 2025
+**Release Date**: January 26th, 2025
 **Supported**: Windows 10/11
 
 ### Important Notice:  
