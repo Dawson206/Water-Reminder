@@ -1,13 +1,12 @@
 **Dawson's Water Reminder - v12.6.0 to v12.7.0**
 
 **New Features:**
-- Added GUI frames to global variables for a more cohesive UI/UX design.
+- UI/UX layout enhancements, including streamlining the user interface for better accessibility and performance.
 - Replaced the text entry field for setting reminder time with a slider, addressing various defects and aligning with the overall UX/UI design.
 - Removed redundant code/features related to text entry for improved readability and functionality.
 
 **Bug Fixes & Improvements:**
-- UI/UX layout enhancements, including streamlining the user interface for better accessibility and performance.
-- Various major/minor bug fixes and improvements
+- Various major/minor bug fixes and improvements.
 
 **Please report any issues to:** [GitHub Issues](https://github.com/Dawson206/Water-Reminder/issues)
 
