@@ -32,7 +32,7 @@ reminders_running = False
 ui_queue = queue.Queue()
 
 
-# Windows Core Audio API
+#Windows Core Audio API
 MMDeviceEnumerator = "{BCDE0395-E52F-467C-8E3D-C4579291692E}"
 IMMNotificationClient = "{7991EEC9-7E89-4D85-8390-6C703CEC60C0}"
 
@@ -65,13 +65,11 @@ def start_audio_monitor():
         monitor_audio_device_changes()
     threading.Thread(target=monitor_thread, daemon=True).start()
 
-start_audio_monitor()
-
 
 def enable_autostart():
     try:
         app_name = "DawsonWaterReminder"
-        executable_path = os.path.abspath(__file__)  # Path to your script
+        executable_path = os.path.abspath(__file__)  #Path to your script
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
         winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, executable_path)
         winreg.CloseKey(key)
@@ -99,9 +97,9 @@ def toggle_autostart():
     """
     app_name = "DawsonsWaterReminder"
 
-    if getattr(sys, 'frozen', False):  # Check if running as a PyInstaller package
+    if getattr(sys, 'frozen', False):  #Check if running as a PyInstaller package
         exe_path = sys.executable
-    else:  # Running as a script
+    else:  #Running as a script
         exe_path = os.path.abspath(__file__)
 
     registry_key = r"Software\Microsoft\Windows\CurrentVersion\Run"
@@ -121,12 +119,12 @@ def toggle_autostart():
 
 
 def get_config_file_path():
-    if getattr(sys, 'frozen', False):  # If running as a PyInstaller bundle
+    if getattr(sys, 'frozen', False):  #If running as a PyInstaller bundle
         base_dir = sys._MEIPASS
     else:
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Use AppData folder for the config file in case of packaged app
+    #Use AppData folder for the config file in case of packaged app
     appdata_dir = os.getenv('APPDATA', os.path.expanduser("~"))
     config_file_path = os.path.join(appdata_dir, "DawsonsWaterReminder", "config.ini")
 
@@ -148,7 +146,8 @@ def load_settings():
                 reminder_interval = config["Settings"].getint("interval_minutes", 30)
                 volume.set(volume_level)
                 interval_minutes.set(reminder_interval)
-
+                interval_slider.set(reminder_interval)
+                update_slider_label(reminder_interval)
                 autostart_state = config["Settings"].getint("autostart", 0)
                 autostart_enabled.set(autostart_state)
 
@@ -179,6 +178,7 @@ def save_settings(sound_file_path=None):
 
     config["Settings"]["volume"] = str(volume.get())
     config["Settings"]["interval_minutes"] = str(interval_minutes.get())
+    config["Settings"]["interval_slider"] =str(interval_slider.get())
     config["Settings"]["autostart"] = str(autostart_enabled.get())
 
     try:
@@ -286,7 +286,7 @@ def start_reminders():
     reminder_thread = threading.Thread(target=reminder_loop, args=(interval_seconds,), daemon=True)
     reminder_thread.start()
     start_button.configure(state="disabled")
-    interval_entry.configure(state="disabled")
+    interval_slider.configure(state="disabled")
     sound_button.configure(state="disabled")
     volume_slider.configure(state="normal")
     preview_button.configure(state="disabled")
@@ -303,7 +303,7 @@ def stop_reminders():
     save_settings()
     countdown_label.configure(text="Next reminder in: --:--")
     start_button.configure(state="normal")
-    interval_entry.configure(state="normal")
+    interval_slider.configure(state="normal")
     sound_button.configure(state="normal")
     volume_slider.configure(state="normal")
     preview_button.configure(state="normal")
@@ -348,14 +348,10 @@ def create_tray_icon():
         icon.run()
     except Exception as e:
         print(f"Error loading tray icon: {e}")
+    
 
-
-def update_entry_width(*args):
-    current_text = str(interval_minutes.get())
-    min_width = 35
-    additional_width = len(current_text) * 2
-    new_width = min_width + additional_width
-    interval_entry.configure(width=new_width)
+def update_slider_label(value):
+    reminder_label.configure(text=f"Reminder Time: {int(value)} (Minutes)")
 
 
 def save_on_exit():
@@ -363,15 +359,16 @@ def save_on_exit():
     root.destroy()
 
 
+#Global Variables:
 root = ctk.CTk()
 
 autostart_enabled = ctk.IntVar(value=0)
 if not os.path.exists(config_file_path):
     autostart_enabled.set(0)
 
-build_number = "v12.6.0 - Jan 20th, 2025"
 root.title(f"Dawson's Water Reminder")
-root.geometry("400x560")
+build_number = "v12.7.0 - Jan 26th, 2025"
+root.geometry("400x775")
 root.resizable(True, True)
 root.configure(bg="#A8E6A1")
 root.protocol("WM_DELETE_WINDOW", save_on_exit)
@@ -379,43 +376,71 @@ icon_path = os.path.join(base_dir, "water_timer_3.ico")
 root.iconbitmap(icon_path)
 custom_font = ctk.CTkFont(family="Arial", size=12)
 interval_minutes = ctk.IntVar(value=30)
-volume_label = ctk.CTkLabel(root, text="Select & Preview Sound", font=custom_font)
+
+
+#Select Audio & Volume Slider Frame
+sound_frame = ctk.CTkFrame(root)
+sound_frame.pack(pady=20, padx=20, fill="x")
+
+volume_label = ctk.CTkLabel(sound_frame, text="Select An Audio File (.WAV)", font=custom_font)
 volume_label.pack(pady=5)
-sound_button = ctk.CTkButton(root, text="Select Sound", font=custom_font, command=select_sound_file)
+sound_button = ctk.CTkButton(sound_frame, text="Select Sound", font=custom_font, command=select_sound_file)
 sound_button.pack(pady=10)
-volume_label = ctk.CTkLabel(root, text="Volume:", font=custom_font)
+volume_label = ctk.CTkLabel(sound_frame, text="Volume:", font=custom_font)
 volume_label.pack(pady=5)
 volume = ctk.IntVar(value=75)
-volume_slider = ctk.CTkSlider(root, from_=0, to=100, variable=volume, command=update_volume, width=200)
-volume_slider.pack()
-preview_button = ctk.CTkButton(root, text="Preview Sound", font=custom_font, command=preview_sound)
+volume_slider = ctk.CTkSlider(sound_frame, from_=0, to=100, variable=volume, command=update_volume, width=200)
+volume_slider.pack(pady=(0, 20))
+
+#Preview Audio Frame
+preview_frame = ctk.CTkFrame(root)
+preview_frame.pack(pady=20, padx=20, fill="x")
+
+preview_label = ctk.CTkLabel(preview_frame, text="Preview Audio", font=custom_font)
+preview_label.pack(pady=5)
+preview_button = ctk.CTkButton(preview_frame, text="Preview Sound", font=custom_font, command=preview_sound)
 preview_button.pack(pady=10)
-stop_preview_button = ctk.CTkButton(root, text="Stop Preview Sound", font=custom_font, command=stop_preview_sound, state="disabled")
-stop_preview_button.pack(pady=10)
-label = ctk.CTkLabel(root, text="Reminder Time (Minutes):", font=custom_font)
-label.pack(pady=10)
-interval_entry = ctk.CTkEntry(root, textvariable=interval_minutes, font=custom_font, width=35, justify="center")
-interval_entry.pack()
-interval_minutes.trace("w", update_entry_width)
-start_button = ctk.CTkButton(root, text="Start Reminders", font=custom_font, command=start_reminders)
-start_button.pack(pady=10)
-stop_button = ctk.CTkButton(root, text="Stop Reminders", font=custom_font, command=stop_reminders, state="disabled")
+stop_preview_button = ctk.CTkButton(preview_frame, text="Stop Preview Sound", font=custom_font, command=stop_preview_sound, state="disabled")
+stop_preview_button.pack(pady=(10, 20))
+
+#Reminder Time Slider Frame
+remindertime_frame = ctk.CTkFrame(root)
+remindertime_frame.pack(pady=20, padx=20, fill="x")
+
+reminder_label = ctk.CTkLabel(
+    remindertime_frame, 
+    text=f"Reminder Time: {interval_minutes.get()} (Minutes)", 
+    font=custom_font
+)
+reminder_label.pack(pady=10)
+
+interval_slider = ctk.CTkSlider(
+    remindertime_frame,
+    from_=1,
+    to=60,
+    variable=interval_minutes,
+    command=lambda value: (interval_minutes.set(int(value)), update_slider_label(int(value))),
+    number_of_steps=59,
+    width=200
+)
+interval_slider.pack()
+
+start_button = ctk.CTkButton(remindertime_frame, text="Start Reminders", font=custom_font, command=start_reminders)
+start_button.pack(pady=(20, 10))
+stop_button = ctk.CTkButton(remindertime_frame, text="Stop Reminders", font=custom_font, command=stop_reminders, state="disabled")
 stop_button.pack(pady=10)
-countdown_label = ctk.CTkLabel(root, text="Next reminder in: --:--", font=custom_font)
+countdown_label = ctk.CTkLabel(remindertime_frame, text="Next reminder in: --:--", font=custom_font)
 countdown_label.pack(pady=10)
+
+#Minimize To Tray
 minimize_button = ctk.CTkButton(root, text="Minimize to Tray", font=custom_font, command=minimize_to_tray)
 minimize_button.pack(pady=10)
-build_number_color = "#ffffff"
-build_number_label = ctk.CTkLabel(root, text=f"Build {build_number}", font=custom_font, text_color=build_number_color)
-build_number_label.pack(pady=5)
-build_number_label.place(x=200, y=580, anchor="center")
-label_name = ctk.CTkLabel(root, text="Connor Dawson Carlson", font=custom_font)
-label_name_color = "#ffffff"
-label_name.pack(pady=5)
-label_name.place(x=200, y=600, anchor="center")
 
+#Start on boot
+autostart_frame = ctk.CTkFrame(root)
+autostart_frame.pack(pady=20, padx=20, fill="x")
 autostart_checkbox = ctk.CTkCheckBox(
-    root,
+    autostart_frame,
     text="Start with Windows",
     variable=autostart_enabled,
     command=toggle_autostart,
@@ -424,6 +449,15 @@ autostart_checkbox = ctk.CTkCheckBox(
     width=20,
 )
 autostart_checkbox.pack(pady=10)
+
+#Information Frame
+info_frame = ctk.CTkFrame(root,)
+info_frame.pack(pady=20, padx=20, fill="x")
+build_number_color = "#ffffff"
+label_name_color = "#ffffff"
+combined_text = f"Build {build_number}\nConnor Dawson Carlson"
+combined_label = ctk.CTkLabel(info_frame, text=combined_text, font=custom_font, text_color=build_number_color)
+combined_label.pack(pady=5)
 
 load_settings()
 process_ui_queue()
