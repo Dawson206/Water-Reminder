@@ -69,7 +69,7 @@ def start_audio_monitor():
 def enable_autostart():
     try:
         app_name = "DawsonWaterReminder"
-        executable_path = os.path.abspath(__file__)  #Path to your script
+        executable_path = os.path.abspath(__file__)  #Path to script
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
         winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, executable_path)
         winreg.CloseKey(key)
