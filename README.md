@@ -1,11 +1,8 @@
 ![water_timer_3](https://github.com/user-attachments/assets/2c1bcc3b-415e-4989-b79b-136fe4fa27ee)
 
-**Release Name**: Dawson's Water Reminder v12.7.0  
-**Release Date**: January 26th, 2025
+**Release Name**: Dawson's Water Reminder v12.8.1  
+**Release Date**: October 17th, 2025
 **Supported**: Windows 10/11
-
-### Important Notice:  
-Due to a false positive detection by Windows Defender Security, most likely from this not having a CA digital signature, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
 
 # Dawson's Water Reminder
 
@@ -25,7 +22,6 @@ Due to a false positive detection by Windows Defender Security, most likely from
 - `pygame`: For sound playback functionality.
 - `pystray`: To create a system tray icon with options for app control.
 - `ctypes`, `comtypes`: For handling Windows-specific APIs such as detecting audio device changes.
-- `winreg`: For managing the Windows registry for autostart functionality.
 - `configparser`: For storing and loading user settings from a configuration file.
 
 ## How It Works:
@@ -41,21 +37,25 @@ Here’s the updated version with optional instructions for downloading a provid
 
 # Installation Instructions  
 
-### Important Notice:  
-Again, due to a false positive detection by Windows Defender Security, it is currently necessary to create an exception in Defender Security to allow the installation and proper functioning of the application. Currently working on getting this fixed.
-
-#### To install **Dawson's Water Reminder v12.7.0**, follow these steps:  
+#### To install **Dawson's Water Reminder**, follow these steps:  
 
 1. **Download the Installer:**  
-   - Click the **DawsonsWaterReminderv12.7.0_Setup.exe** to download the installer.  
+   - Click the **DawsonsWaterReminder.exe** to download the application.  
 
 2. **Download a Sound File (Optional):**  
    - If you do not have a preferred `.wav` sound file for the reminder, download one of the provided `.wav` audio files from below.
    - Save the file to an easily accessible location, such as your Documents, Downloads, Music, or Desktop folder.  
 
-3. **Run the Installer:**  
-   - Locate the downloaded installer file and double-click it to start the installation process.  
-   - Follow the on-screen prompts to complete the installation.  
+3. **Run the application:**  
+   - Locate the downloaded file and double-click it to start the installation.  
+   - Follow the on-screen prompts to complete setup.  
+   - Windows may show a message saying:  
+     *“Microsoft Defender SmartScreen prevented an unrecognized app from starting. Running this app might put your PC at risk.”*  
+   - Click **More Info**, then select **Run Anyway** to continue.  
+
+   **Note:**  
+   This message appears because the installer isn’t digitally signed yet, not because it’s unsafe. The app has been tested and is safe to run     the prompt simply means Windows doesn’t recognize the publisher.
+
 
 4. **Launch the Application:**  
    - After installation, find Dawson's Water Reminder in your Start menu or on your Desktop (if the option was selected during installation).  
@@ -64,6 +64,22 @@ Again, due to a false positive detection by Windows Defender Security, it is cur
 5. **Set Up Your Reminder:**  
    - During the initial setup, select your `.wav` file by clicking the "Select Sound" button in the application. You can choose the downloaded default sound file or your own `.wav` file below 100MB.  
    - Configure your reminder intervals and volume preferences to get started.  
+ 
+6. **Auto Start with Windows:**  
+   - To allow this application to start automatically when Windows boots, follow these steps:  
+   - Right-click the **.exe** file and select **Create shortcut**.  
+   - Press **Windows + R** on your keyboard to open the Run dialog.  
+   - Type:
+     ```
+     shell:startup
+     ```
+   - Press **Enter** to open the Startup folder.  
+   - Drag and drop the shortcut you created into this folder.  
+   - The application will now launch automatically each time you log in to Windows.  
+
+   **What `shell:startup` Does:**  
+   Typing `shell:startup` simply opens a safe Windows system folder that runs any shortcuts placed inside it when you log in.  
+   It’s the same method Windows uses for programs like OneDrive or Discord to start automatically.  
 
 ### System Requirements:  
 - **OS:** Windows 10/11  
@@ -71,8 +87,8 @@ Again, due to a false positive detection by Windows Defender Security, it is cur
 - **Disk Space:** Approximately 25 MB  
 
 ### Troubleshooting:  
-- If you encounter any issues with the installation, ensure that your antivirus or firewall settings are not blocking the installer.  
+- If you encounter any issues with the installation, ensure that your antivirus or firewall settings are not blocking the .exe.  
 
 This project is a great way to stay hydrated while working on your computer, and it's designed to be lightweight and unobtrusive. If you have suggestions or want to contribute, feel free to open an issue or create a pull request! If you discover any issues please report to [Water-Reminder/Issues](https://github.com/Dawson206/Water-Reminder/issues)
 
-### v12.6.0 to v12.7.0 [Changelog](https://github.com/Dawson206/Water-Reminder/blob/main/changelog_v12.7.0.txt)
+### v12.6.0 to v12.8.1 [Changelog](https://github.com/Dawson206/Water-Reminder/blob/main/changelog_v12.7.0.txt)
