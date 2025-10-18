@@ -1,4 +1,4 @@
-**Dawson's Water Reminder - v12.6.0 to v12.7.0**
+**Dawson's Water Reminder - v12.6.0 to v12.8.1**
 
 **New Features:**
 - UI/UX layout enhancements, including streamlining the user interface for better accessibility and performance.
@@ -13,3 +13,69 @@
 *Build v12.7.0 - 01/26/2025*
 
 This version streamlines the user experience, making the app more intuitive and visually clean!
+
+# Water Reminder – Change Log (v12.8.1)
+
+**Previous Version:** v12.7.0 (Jan 26th, 2025)  
+**Current Version:** v12.8.1 (Oct 15th, 2025)
+
+---
+
+## 🧹 Removed
+- **Autostart functionality**
+  - Removed all functions and registry code related to Windows autostart:
+    - `enable_autostart`
+    - `disable_autostart`
+    - `toggle_autostart`
+  - Deleted corresponding `winreg` import.
+  - Removed the “Start with Windows” checkbox and associated GUI frame.
+
+---
+
+## 🎨 Interface & Layout
+- **Window title updated**
+  - From: `"Dawson's Water Reminder"`
+  - To: `"Water Reminder | v12.8.1 | Connor Carlson"`
+
+- **Build info updated**
+  - Old: `v12.7.0 - Jan 26th, 2025`
+  - New: `v12.8.0 - Oct 15th, 2025`
+
+- **Window size adjusted**
+  - From `400x780` → `400x665`
+
+- **Reduced spacing**
+  - Decreased vertical padding between sections (`pady=20` → `pady=10`) for a tighter layout.
+
+- **Info frame removed**
+  - The footer label showing *"Build v12.7.0 – Connor Dawson Carlson"* was removed.
+
+---
+
+## ⚙️ Code & Behavior
+- **Registry operations removed**
+  - All references to `winreg` deleted along with related error handling.
+
+- **Simplified imports**
+  - Removed unnecessary modules after autostart removal.
+
+- **Configuration management**
+  - Still handled through AppData JSON file (unchanged).
+
+- **Startup logic**
+  - No longer interacts with Windows registry or startup entries.
+
+- **General cleanup**
+  - Removed redundant comments.
+  - Slightly reorganized code for readability.
+
+---
+
+## 🧭 Summary
+This update focuses on **simplification and cleanup**:
+- Dropped Windows autostart support.  
+- More compact and modern UI layout.  
+- Updated versioning and title.  
+- Minor readability and structure improvements.
+
+---
