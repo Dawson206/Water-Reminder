@@ -14,7 +14,6 @@ import ctypes
 from ctypes import wintypes, POINTER
 from comtypes import CLSCTX_ALL
 from comtypes.client import CreateObject
-import winreg
 import sys
 
 
@@ -64,59 +63,6 @@ def start_audio_monitor():
     def monitor_thread():
         monitor_audio_device_changes()
     threading.Thread(target=monitor_thread, daemon=True).start()
-
-
-def enable_autostart():
-    try:
-        app_name = "DawsonWaterReminder"
-        executable_path = os.path.abspath(__file__)  #Path to script
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
-        winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, executable_path)
-        winreg.CloseKey(key)
-        messagebox.showinfo("Autostart Enabled", "The application will now start with Windows.")
-    except Exception as e:
-        messagebox.showerror("Error", f"Could not enable autostart: {e}")
-
-
-def disable_autostart():
-    try:
-        app_name = "DawsonWaterReminder"
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE)
-        winreg.DeleteValue(key, app_name)
-        winreg.CloseKey(key)
-        messagebox.showinfo("Autostart Disabled", "The application will no longer start with Windows.")
-    except FileNotFoundError:
-        messagebox.showinfo("Autostart Not Found", "Autostart is already disabled.")
-    except Exception as e:
-        messagebox.showerror("Error", f"Could not disable autostart: {e}")
-
-
-def toggle_autostart():
-    """
-    Enable or disable autostart based on the state of autostart_enabled.
-    """
-    app_name = "DawsonsWaterReminder"
-
-    if getattr(sys, 'frozen', False):  #Check if running as a PyInstaller package
-        exe_path = sys.executable
-    else:  #Running as a script
-        exe_path = os.path.abspath(__file__)
-
-    registry_key = r"Software\Microsoft\Windows\CurrentVersion\Run"
-    try:
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_key, 0, winreg.KEY_SET_VALUE) as key:
-            if autostart_enabled.get() == 1:
-                winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, exe_path)
-                save_settings()
-            else:  # Disable autostart
-                winreg.DeleteValue(key, app_name)
-                save_settings()
-    except FileNotFoundError:
-        if autostart_enabled.get() == 0:
-            messagebox.showinfo("Autostart Already Disabled", "Autostart was not enabled.")
-    except Exception as e:
-        messagebox.showerror("Autostart Error", f"Failed to update autostart settings: {str(e)}")
-
 
 def get_config_file_path():
     if getattr(sys, 'frozen', False):  #If running as a PyInstaller bundle
@@ -366,9 +312,9 @@ autostart_enabled = ctk.IntVar(value=0)
 if not os.path.exists(config_file_path):
     autostart_enabled.set(0)
 
-root.title(f"Dawson's Water Reminder")
-build_number = "v12.7.0 - Jan 26th, 2025"
-root.geometry("400x780")
+root.title(f"Water Reminder | v12.8.1 | Connor Carlson")
+build_number = "v12.8.0 - Oct 15th, 2025"
+root.geometry("400x665")
 root.resizable(True, True)
 root.configure(bg="#A8E6A1")
 root.protocol("WM_DELETE_WINDOW", save_on_exit)
@@ -380,7 +326,7 @@ interval_minutes = ctk.IntVar(value=30)
 
 #Select Audio & Volume Slider Frame
 sound_frame = ctk.CTkFrame(root)
-sound_frame.pack(pady=20, padx=20, fill="x")
+sound_frame.pack(pady=10, padx=20, fill="x")
 
 volume_label = ctk.CTkLabel(sound_frame, text="Select An Audio File (.WAV)", font=custom_font)
 volume_label.pack(pady=5)
@@ -394,7 +340,7 @@ volume_slider.pack(pady=(0, 20))
 
 #Preview Audio Frame
 preview_frame = ctk.CTkFrame(root)
-preview_frame.pack(pady=20, padx=20, fill="x")
+preview_frame.pack(pady=10, padx=20, fill="x")
 
 preview_label = ctk.CTkLabel(preview_frame, text="Preview Audio", font=custom_font)
 preview_label.pack(pady=5)
@@ -405,7 +351,7 @@ stop_preview_button.pack(pady=(10, 20))
 
 #Reminder Time Slider Frame
 remindertime_frame = ctk.CTkFrame(root)
-remindertime_frame.pack(pady=20, padx=20, fill="x")
+remindertime_frame.pack(pady=10, padx=20, fill="x")
 
 reminder_label = ctk.CTkLabel(
     remindertime_frame, 
@@ -433,31 +379,10 @@ countdown_label = ctk.CTkLabel(remindertime_frame, text="Next reminder in: --:--
 countdown_label.pack(pady=10)
 
 #Minimize To Tray
-minimize_button = ctk.CTkButton(root, text="Minimize to Tray", font=custom_font, command=minimize_to_tray)
+minimize_frame = ctk.CTkFrame(root)
+minimize_frame.pack(pady=10, padx=20, fill="x")
+minimize_button = ctk.CTkButton(minimize_frame, text="Minimize to Tray", font=custom_font, command=minimize_to_tray)
 minimize_button.pack(pady=10)
-
-#Start on boot
-autostart_frame = ctk.CTkFrame(root)
-autostart_frame.pack(pady=20, padx=20, fill="x")
-autostart_checkbox = ctk.CTkCheckBox(
-    autostart_frame,
-    text="Start with Windows",
-    variable=autostart_enabled,
-    command=toggle_autostart,
-    font=custom_font,
-    height=20,
-    width=20,
-)
-autostart_checkbox.pack(pady=10)
-
-#Information Frame
-info_frame = ctk.CTkFrame(root,)
-info_frame.pack(pady=20, padx=20, fill="x")
-build_number_color = "#ffffff"
-label_name_color = "#ffffff"
-combined_text = f"Build {build_number}\nConnor Dawson Carlson"
-combined_label = ctk.CTkLabel(info_frame, text=combined_text, font=custom_font, text_color=build_number_color)
-combined_label.pack(pady=5)
 
 load_settings()
 process_ui_queue()
